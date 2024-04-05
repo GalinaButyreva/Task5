@@ -6,21 +6,24 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Description;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
-import proj.task5.ProductExample.Model.InstanceArrangement;
-import proj.task5.ProductExample.Model.ProdExample;
-import proj.task5.ProductExample.Service.*;
-import proj.task5.Repository.Tpp_productRepo;
-import proj.task5.model.Tpp_product;
+
+import proj.task5.exceptions.NotFoundReqException;
+import proj.task5.productExample.model.InstanceArrangement;
+import proj.task5.productExample.model.ProdExample;
+import proj.task5.productExample.service.*;
+import proj.task5.repository.Tpp_productRepo;
+import proj.task5.entity.Tpp_product;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.junit.Assert.assertThrows;
 
 @SpringBootTest(classes = {Step_21_PE.class, Tpp_productRepo.class})
 @SpringBootApplication(scanBasePackages = "proj.task5")
@@ -99,15 +102,19 @@ public class CreateExampleNotNull {
         Tpp_product tpp_product;
         //tpp_product =tpp_productRepo.findFirst().orElse(null);
         makerPExample.setModelProdExample(modelExample);
-        ResponseEntity<?> responce = makerPExample.execute();
-        tpp_product = tpp_productRepo.findFirstByNumber(modelExample.getContractNumber());
+        // запись не найдена
+        modelExample.setInstanceId(99L);
+        assertThrows(NotFoundReqException.class, ()->step_21_pe.execute(modelExample));
 
+        modelExample.setInstanceId(null);
+
+        makerPExample.setModelProdExample(modelExample);
+        makerPExample.execute();
+        tpp_product = tpp_productRepo.findFirstByNumber(modelExample.getContractNumber());
         Assertions.assertNotNull(tpp_product);
 
         modelExample.setInstanceId(tpp_product.getId());
-        responce = step_21_pe.execute(modelExample);
-        Assertions.assertNull(responce);
-
+        Assertions.assertDoesNotThrow(()->step_21_pe.execute(modelExample));
     }
 
     @Test
@@ -115,17 +122,18 @@ public class CreateExampleNotNull {
     void maker_PExampleTest() {
         Tpp_product tpp_product;
         makerPExample.setModelProdExample(modelExample);
-        ResponseEntity<?> responce = makerPExample.execute();
+        makerPExample.execute();
         tpp_product = tpp_productRepo.findFirstByNumber(modelExample.getContractNumber());
 
         Assertions.assertNotNull(tpp_product);
 
         modelExample.setInstanceId(tpp_product.getId());
 
-        responce =  step_23_pe.execute(modelExample);
+        StructOkAnswer responce =   (StructOkAnswer) step_23_pe.execute(modelExample);
 
         Assertions.assertNotNull(responce);
-        Assertions.assertEquals(HttpStatus.CREATED.value(), responce.getStatusCode().value());
+        Assertions.assertNotNull(responce.getInstanseId());
 
     }
+
 }

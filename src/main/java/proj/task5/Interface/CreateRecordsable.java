@@ -1,7 +1,5 @@
 package proj.task5.Interface;
 
-import proj.task5.model.Tpp_product;
-
 import java.util.List;
 
 public interface CreateRecordsable {

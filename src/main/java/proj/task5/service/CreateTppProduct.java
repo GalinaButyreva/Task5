@@ -4,12 +4,13 @@ import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import proj.task5.Interface.CreateRecordsable;
-import proj.task5.ProductExample.Model.ProdExample;
-import proj.task5.Repository.Tpp_productRepo;
-import proj.task5.Repository.Tpp_ref_product_classRepo;
-import proj.task5.model.Tpp_product;
-import proj.task5.model.Tpp_ref_product_class;
+import proj.task5.productExample.model.ProdExample;
+import proj.task5.repository.Tpp_productRepo;
+import proj.task5.repository.Tpp_ref_product_classRepo;
+import proj.task5.entity.Tpp_product;
+import proj.task5.entity.Tpp_ref_product_class;
 
 
 import java.util.List;
@@ -50,4 +51,10 @@ public class CreateTppProduct implements CreateRecordsable {
        // возможна реализация в будущем
         return null;
     }
+
+
+
+
+
+
 }

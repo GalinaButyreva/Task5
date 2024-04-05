@@ -1,10 +1,9 @@
 package proj.task5.Interface;
 
 import org.springframework.http.ResponseEntity;
-import proj.task5.ProductExample.Model.ProdExample;
-import proj.task5.ProductRegistr.Model.ProdRegistr;
+import proj.task5.productExample.model.ProdExample;
 
 // Выполнение шагов обработки Экземпляр Продукта
 public interface StepPExampleExecable {
-    ResponseEntity<?> execute(ProdExample prodExample);
+  Object execute(ProdExample prodExample);
 }

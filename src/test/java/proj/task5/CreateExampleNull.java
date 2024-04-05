@@ -5,20 +5,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Description;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
-import proj.task5.ProductExample.Model.InstanceArrangement;
-import proj.task5.ProductExample.Model.ProdExample;
-import proj.task5.ProductExample.Service.*;
-import proj.task5.Repository.Tpp_productRepo;
+import proj.task5.exceptions.BadReqException;
+import proj.task5.exceptions.NotFoundReqException;
+import proj.task5.productExample.model.InstanceArrangement;
+import proj.task5.productExample.model.ProdExample;
+import proj.task5.productExample.service.*;
+import proj.task5.repository.Tpp_productRepo;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.junit.Assert.assertThrows;
 
 @SpringBootTest(classes = {Step_1_PE.class, Step_11_PE.class, Tpp_productRepo.class})
 @SpringBootApplication(scanBasePackages = "proj.task5")
@@ -88,42 +90,34 @@ public class CreateExampleNull {
     @Autowired
     Step_14_PE step_14_pe;
 
-    @Autowired
-    Maker_PExample makerPExample;
 
     @Test
     @Description("1 Проверка 1-го шага ТЗ ЭП Заполнение обязательных значений")
     void step_1_PETest(){
 
         modelExample.setProductType(null);
-        ResponseEntity<?> responce = step_1_pe.execute(modelExample);
-        Assertions.assertNotNull(responce);
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), responce.getStatusCode().value());
+        assertThrows(BadReqException.class, ()->step_1_pe.execute(modelExample));
 
         modelExample.setContractDate(null);
-        responce = step_1_pe.execute(modelExample);
-        Assertions.assertNotNull(responce);
+        assertThrows(BadReqException.class, ()->step_1_pe.execute(modelExample));
 
         modelExample.setContractDate(LocalDate.parse("2024-03-29", DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         modelExample.setProductType("НСО");
-        responce = step_1_pe.execute(modelExample);
-        Assertions.assertNull(responce);
+        Assertions.assertDoesNotThrow(()->step_1_pe.execute(modelExample));
 
     }
     @Test
     @Description("2 Проверка 1.1  шага ТЗ ЭП")
         // Проверка наличия записи в таблице tpp_product со значением number (если есть отправляем BadStatus )
     void step_11_PETest(){
-        ResponseEntity<?> responce = step_11_pe.execute(modelExample);
-        Assertions.assertNull(responce);
+        Assertions.assertDoesNotThrow(()->step_11_pe.execute(modelExample));
     }
 
     @Test
     @Description("3 Проверка 1.2  шага ТЗ ЭП")
         // Проверка записей в таблице agreement со значением  number из  массива InstanceArrangement, если есть отправляем BadStatus
     void step_12_PETest(){
-        ResponseEntity<?> responce = step_12_pe.execute(modelExample);
-        Assertions.assertNull(responce);
+        Assertions.assertDoesNotThrow(()->step_12_pe.execute(modelExample));
     }
 
     @Test
@@ -132,28 +126,19 @@ public class CreateExampleNull {
         // Если не нашли вернем ответ ()
     void step_13_PETest(){
         modelExample.setProductCode("03.00000.002");
-        ResponseEntity<?> responce = step_13_pe.execute(modelExample);
-        Assertions.assertNotNull(responce);
-        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), responce.getStatusCode().value());
+        assertThrows(NotFoundReqException.class, ()->step_13_pe.execute(modelExample));
         modelExample.setProductCode("03.012.002");
-        responce = step_13_pe.execute(modelExample);
-        Assertions.assertNull(responce);
+        Assertions.assertDoesNotThrow(()->step_13_pe.execute(modelExample));
     }
 
     @Test
     @Description("5 Проверка создания записей")
     void maker_PExampleTest() {
-
-        ResponseEntity<?> responce =  step_14_pe.execute(modelExample);
-        Assertions.assertNotNull(responce);
-        Assertions.assertEquals(HttpStatus.CREATED.value(), responce.getStatusCode().value());
-
-        responce = step_11_pe.execute(modelExample);
-
-        Assertions.assertNotNull(responce);
-        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), responce.getStatusCode().value());
-
-
+        StructOkAnswer okAnswer  =  (StructOkAnswer) step_14_pe.execute(modelExample);
+        Assertions.assertNotNull(okAnswer);
+        Assertions.assertNotNull(okAnswer);
+        Assertions.assertNotNull(okAnswer.getInstanseId());
+        assertThrows(BadReqException.class, ()->step_11_pe.execute(modelExample));
     }
 
 

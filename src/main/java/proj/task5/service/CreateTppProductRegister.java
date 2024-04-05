@@ -4,14 +4,14 @@ import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import proj.task5.Enum.State;
+import proj.task5.enumState.State;
 import proj.task5.Interface.CreateRecordsable;
-import proj.task5.ProductExample.Model.ProdExample;
-import proj.task5.ProductRegistr.Model.ProdRegistr;
-import proj.task5.Repository.Account_poolRepo;
-import proj.task5.Repository.Tpp_product_registerRepo;
-import proj.task5.Repository.Tpp_ref_product_classRepo;
-import proj.task5.model.*;
+import proj.task5.productExample.model.ProdExample;
+import proj.task5.productRegistr.model.ProdRegistr;
+import proj.task5.repository.Account_poolRepo;
+import proj.task5.repository.Tpp_product_registerRepo;
+import proj.task5.repository.Tpp_ref_product_classRepo;
+import proj.task5.entity.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,10 +86,10 @@ public class CreateTppProductRegister  implements CreateRecordsable {
     public<T, K> List<T> create_recs_table(K model){
     ProdExample prodExample = (ProdExample) model;
     List<Tpp_product_register> prodRegLst = new ArrayList<>();
-    // Если заполнили на предыдущем шаге не заполняем (если будет другое условие на отбор записей  перезаписать массив)
-    if (tppTypeLst.size() == 0)
-        tppTypeLst = getLstType(prodExample.getProductCode());
+
+    tppTypeLst = getLstType(prodExample.getProductCode());
     for (Tpp_ref_product_register_type typeLst : tppTypeLst) {
+
         ProdRegistr prodRegistr = new ProdRegistr();
         prodRegistr.setInstanceId(tpp_product.getId());
         prodRegistr.setBranchCode(prodExample.getBranchCode());
@@ -97,7 +97,9 @@ public class CreateTppProductRegister  implements CreateRecordsable {
         prodRegistr.setMdmCode(prodExample.getMdmCode());
         prodRegistr.setPriorityCode(prodExample.getUrgencyCode());
         prodRegistr.setRegistryTypeCode(typeLst.getValue());
+        // Добавляем записи
         Tpp_product_register tpp_product_register = create_rec_table(prodRegistr);
+       // System.out.println("Добавлена запись");
         prodRegLst.add(tpp_product_register);
     }
     return (List<T>) prodRegLst;
@@ -106,8 +108,6 @@ public class CreateTppProductRegister  implements CreateRecordsable {
    public List<Tpp_product_register> create_recs_table_product_register(ProdExample prodExample
                                                                       , Tpp_product tpp_product){
         this.tpp_product = tpp_product;
-        //List<Tpp_product_register> prodRegLst = create_recs_table(prodExample);
-        //return prodRegLst;
        return create_recs_table(prodExample);
     }
 
